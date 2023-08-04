@@ -1,0 +1,102 @@
+#!/usr/bin/env python3
+
+"""
+xwhich
+"""
+
+import argparse
+import fnmatch
+import os
+import re
+import sys
+from collections import OrderedDict
+from enum import Enum
+from pathlib import Path
+from typing import Generator
+
+
+Pattern = Enum('Pattern', ['Shell', 'Regex'])
+
+
+def parse_args() -> argparse.Namespace:
+    """
+    Parse command line options
+    """
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument('-a', '--all', action='store_true', help="Show all")
+    argparser.add_argument('-i', '--insensitive', action='store_true', help="Case insensitive")
+    argparser.add_argument('-s', '--shell', action='store_true', help="Check shell pattern")
+    argparser.add_argument('-x', '--regex', action='store_true', help="Check regular expression")
+    argparser.add_argument('command')
+    return argparser.parse_args()
+
+
+def is_executable(path: Path) -> bool:
+    """
+    Returns True is path exists and is executable
+    """
+    if path.is_file():
+        if not os.access(path, os.F_OK | os.X_OK):
+            print(f"WARNING: Not executable: {path}", file=sys.stderr)
+            return False
+        return True
+    return False
+
+
+def xwhich(command: str, ignore_case: bool, pattern: Pattern) -> Generator[Path, None, None]:
+    """
+    Returns a generator with locations of command in PATH
+    """
+    # Use set to skip symlinked directories in PATH
+    paths = OrderedDict.fromkeys(
+        Path(d).resolve() for d in os.getenv("PATH", default=".").split(':')
+        if Path(d).is_dir()
+    )
+    regex = None
+    if pattern is Pattern.Shell:
+        regex = fnmatch.translate(command)
+    elif pattern is Pattern.Regex:
+        regex = command
+    if regex:
+        flags = re.IGNORECASE if ignore_case else 0
+
+    for path in paths:
+        if regex or ignore_case:
+            for file in path.iterdir():
+                if regex:
+                    if re.match(regex, file.name, flags) and is_executable(path / file):
+                        yield path / file
+                else:  # ignore_case
+                    if file.name.lower() == command.lower():
+                        yield path / file
+        elif is_executable(path / command):
+            yield path / command
+
+
+def main():
+    """
+    Main function
+    """
+    opts = parse_args()
+    pattern = None
+    if opts.regex and opts.shell:
+        sys.exit("ERROR: The -s & -x options are mutually exclusive")
+    if opts.regex:
+        pattern = Pattern.Regex
+    elif opts.shell:
+        pattern = Pattern.Shell
+    for path in xwhich(
+        opts.command,
+        ignore_case=opts.insensitive,
+        pattern=pattern,
+    ):
+        print(f"{path}")
+        if not opts.all:
+            sys.exit(0)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except InterruptedError:
+        sys.exit(1)

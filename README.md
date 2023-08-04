@@ -1,3 +1,5 @@
+![Build Status](https://github.com/ricardobranco777/xwhich/actions/workflows/ci.yml/badge.svg)
+
 # xwhich
 Enhanced which
 

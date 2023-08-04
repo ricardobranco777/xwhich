@@ -49,7 +49,7 @@ def xwhich(command: str, ignore_case: bool, pattern: Pattern) -> Generator[Path,
     """
     # Use set to skip symlinked directories in PATH
     paths = OrderedDict.fromkeys(
-        Path(d).resolve() for d in os.getenv("PATH", default=".").split(':')
+        Path(d).resolve() for d in os.getenv("PATH", default=".").split(os.pathsep)
         if Path(d).is_dir()
     )
     regex = None

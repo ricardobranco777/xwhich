@@ -23,10 +23,11 @@ def parse_args() -> argparse.Namespace:
     Parse command line options
     """
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('-a', '--all', action='store_true', help="Show all")
-    argparser.add_argument('-i', '--insensitive', action='store_true', help="Case insensitive")
-    argparser.add_argument('-s', '--shell', action='store_true', help="Check shell pattern")
-    argparser.add_argument('-x', '--regex', action='store_true', help="Check regular expression")
+    argparser.add_argument('-a', '--all', action='store_true', help="Show all occurrences instead of the first")
+    argparser.add_argument('-i', '--insensitive', action='store_true', help="Case insensitive search")
+    argparser.add_argument('-P', '--paths', default=os.getenv("PATH"), help="Restrict search to paths")
+    argparser.add_argument('-s', '--shell', action='store_true', help="Search shell pattern")
+    argparser.add_argument('-x', '--regex', action='store_true', help="Search regular expression")
     argparser.add_argument('command')
     return argparser.parse_args()
 
@@ -38,13 +39,18 @@ def is_executable(path: Path) -> bool:
     return path.is_file() and os.access(path, os.F_OK | os.X_OK)
 
 
-def xwhich(command: str, ignore_case: bool, pattern: Pattern) -> Generator[Path, None, None]:
+def xwhich(
+    command: str,
+    pattern: Pattern,
+    ignore_case: bool = False,
+    check_paths: str = os.getenv("PATH", default="."),
+) -> Generator[Path, None, None]:
     """
     Returns a generator with locations of command in PATH
     """
     # Use set to skip symlinked directories in PATH
     paths = OrderedDict.fromkeys(
-        Path(d).resolve() for d in os.getenv("PATH", default=".").split(os.pathsep)
+        Path(d).resolve() for d in check_paths.split(os.pathsep)
         if Path(d).is_dir()
     )
     regex = None
@@ -82,8 +88,9 @@ def main():
         pattern = Pattern.Shell
     for path in xwhich(
         opts.command,
-        ignore_case=opts.insensitive,
         pattern=pattern,
+        ignore_case=opts.insensitive,
+        check_paths=opts.paths,
     ):
         print(f"{path}")
         if not opts.all:

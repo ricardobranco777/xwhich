@@ -6,17 +6,19 @@ Enhanced which
 ## Usage
 
 ```
-usage: xwhich [-h] [-a] [-i] [-s] [-x] command
+usage: xwhich [-h] [-a] [-i] [-P PATHS] [-s] [-x] command
 
 positional arguments:
   command
 
 options:
-  -h, --help         show this help message and exit
-  -a, --all          Show all
-  -i, --insensitive  Case insensitive
-  -s, --shell        Check shell pattern
-  -x, --regex        Check regular expression
+  -h, --help            show this help message and exit
+  -a, --all             Show all occurrences instead of the first
+  -i, --insensitive     Case insensitive search
+  -P PATHS, --paths PATHS
+                        Restrict search to paths
+  -s, --shell           Search shell pattern
+  -x, --regex           Search regular expression
 ```
 
 ## Notes
@@ -60,4 +62,11 @@ $ xwhich -xa '.*x{2,}.*'
 ```
 $ xwhich -i x
 /usr/bin/X
+```
+
+- Restrict search to `/sbin:/usr/sbin`:
+
+```
+$ xwhich -P /sbin:/usr/sbin ls
+
 ```

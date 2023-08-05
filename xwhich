@@ -33,14 +33,9 @@ def parse_args() -> argparse.Namespace:
 
 def is_executable(path: Path) -> bool:
     """
-    Returns True is path exists and is executable
+    Returns True is file exists and is executable
     """
-    if path.is_file():
-        if not os.access(path, os.F_OK | os.X_OK):
-            print(f"WARNING: Not executable: {path}", file=sys.stderr)
-            return False
-        return True
-    return False
+    return path.is_file() and os.access(path, os.F_OK | os.X_OK)
 
 
 def xwhich(command: str, ignore_case: bool, pattern: Pattern) -> Generator[Path, None, None]:

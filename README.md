@@ -29,6 +29,10 @@ options:
 
 - Windows is not supported unless you append `.exe` to the command and use `-i`
 
+## Requirements
+
+- Tested on Python 3.8+
+
 ## Examples
 
 - List all commands that end with `conf`:

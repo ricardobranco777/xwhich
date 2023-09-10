@@ -14,6 +14,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Generator
 
+VERSION = "1.1"
 
 Pattern = Enum('Pattern', ['Shell', 'Regex'])
 
@@ -22,12 +23,13 @@ def parse_args() -> argparse.Namespace:
     """
     Parse command line options
     """
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument('-a', '--all', action='store_true', help="Show all occurrences instead of the first")
-    argparser.add_argument('-i', '--insensitive', action='store_true', help="Case insensitive search")
-    argparser.add_argument('-P', '--paths', default=os.getenv("PATH"), help="Restrict search to paths")
-    argparser.add_argument('-s', '--shell', action='store_true', help="Search shell pattern")
-    argparser.add_argument('-x', '--regex', action='store_true', help="Search regular expression")
+    argparser = argparse.ArgumentParser(prog=os.path.basename(sys.argv[0]))
+    argparser.add_argument('-a', '--all', action='store_true', help="show all occurrences instead of the first")
+    argparser.add_argument('-i', '--insensitive', action='store_true', help="case insensitive search")
+    argparser.add_argument('-P', '--paths', default=os.getenv("PATH"), help="restrict search to paths")
+    argparser.add_argument('-s', '--shell', action='store_true', help="search shell pattern")
+    argparser.add_argument('-x', '--regex', action='store_true', help="search regular expression")
+    argparser.add_argument('--version', action='version', version=f"%(prog)s {VERSION}")
     argparser.add_argument('command')
     return argparser.parse_args()
 

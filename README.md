@@ -6,19 +6,20 @@ Enhanced which
 ## Usage
 
 ```
-usage: xwhich [-h] [-a] [-i] [-P PATHS] [-s] [-x] command
+usage: ./xwhich [-h] [-a] [-i] [-P PATHS] [-s] [-x] [--version] command
 
 positional arguments:
   command
 
 options:
   -h, --help            show this help message and exit
-  -a, --all             Show all occurrences instead of the first
-  -i, --insensitive     Case insensitive search
+  -a, --all             show all occurrences instead of the first
+  -i, --insensitive     case insensitive search
   -P PATHS, --paths PATHS
-                        Restrict search to paths
-  -s, --shell           Search shell pattern
-  -x, --regex           Search regular expression
+                        restrict search to paths
+  -s, --shell           search shell pattern
+  -x, --regex           search regular expression
+  --version             show program's version number and exit
 ```
 
 ## Notes

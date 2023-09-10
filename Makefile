@@ -16,6 +16,10 @@ pylint:
 mypy:
 	@mypy $(FILES)
 
+.PHONY: black
+black:
+	@black --check $(FILES)
+
 .PHONY: install
 install:
 	install -m 0755 $(BIN) /usr/local/bin/ 2>/dev/null || install -m 0755 $(BIN) $(HOME)/bin/

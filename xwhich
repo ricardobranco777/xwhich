@@ -93,9 +93,9 @@ def main():
     Main function
     """
     opts = parse_args()
-    pattern = None
     if opts.regex and opts.shell:
         sys.exit("ERROR: The -s & -x options are mutually exclusive")
+    pattern = None
     if opts.regex:
         pattern = Pattern.Regex
     elif opts.shell:

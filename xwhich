@@ -12,7 +12,7 @@ import sys
 from collections import OrderedDict
 from enum import Enum
 from pathlib import Path
-from typing import Generator
+from typing import Iterator
 
 VERSION = "1.1"
 
@@ -59,7 +59,7 @@ def xwhich(
     pattern: Pattern,
     ignore_case: bool = False,
     check_paths: str = os.getenv("PATH", default="."),
-) -> Generator[Path, None, None]:
+) -> Iterator[Path]:
     """
     Returns a generator with locations of command in PATH
     """

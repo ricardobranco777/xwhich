@@ -47,13 +47,6 @@ def parse_args() -> argparse.Namespace:
     return argparser.parse_args()
 
 
-def is_executable(path: Path) -> bool:
-    """
-    Returns True is file exists and is executable
-    """
-    return path.is_file() and os.access(path, os.F_OK | os.X_OK)
-
-
 def xwhich(
     command: str,
     pattern: Pattern,
@@ -79,12 +72,12 @@ def xwhich(
         if regex or ignore_case:
             for file in path.iterdir():
                 if regex:
-                    if re.match(regex, file.name, flags) and is_executable(path / file):
+                    if re.match(regex, file.name, flags) and path.joinpath(file).is_file():
                         yield path / file
                 else:  # ignore_case
                     if file.name.lower() == command.lower():
                         yield path / file
-        elif is_executable(path / command):
+        elif path.joinpath(command).is_file():
             yield path / command
 
 

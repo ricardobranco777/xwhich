@@ -99,7 +99,7 @@ def main():
         ignore_case=opts.insensitive,
         check_paths=opts.paths,
     ):
-        print(f"{path}")
+        print(os.fspath(path))
         if not opts.all:
             sys.exit(0)
 

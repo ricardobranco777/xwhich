@@ -72,7 +72,10 @@ def xwhich(
         if regex or ignore_case:
             for file in path.iterdir():
                 if regex:
-                    if re.match(regex, file.name, flags) and path.joinpath(file).is_file():
+                    if (
+                        re.match(regex, file.name, flags)
+                        and path.joinpath(file).is_file()
+                    ):
                         yield path / file
                 else:  # ignore_case
                     if file.name.lower() == command.lower():

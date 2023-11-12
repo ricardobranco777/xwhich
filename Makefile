@@ -2,7 +2,7 @@ BIN=xwhich
 FILES=$(BIN)
 
 .PHONY: all
-all: flake8 pylint mypy
+all: flake8 pylint mypy black
 
 .PHONY: flake8
 flake8:

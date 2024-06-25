@@ -17,14 +17,9 @@ options:
   -i, --insensitive     case insensitive search
   -P PATHS, --paths PATHS
                         restrict search to paths
-  -s, --shell           search shell pattern
   -x, --regex           search regular expression
   --version             show program's version number and exit
 ```
-
-## Notes
-
-- The `-s` & `-x` are mutually exclusive.
 
 ## Bugs / Limitations
 
@@ -39,7 +34,7 @@ options:
 - List all commands that end with `conf`:
 
 ```
-$ xwhich -sa \*conf
+$ xwhich -a \*conf
 /usr/sbin/resolvconf
 /usr/sbin/nfsconf
 /usr/sbin/postconf

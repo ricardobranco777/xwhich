@@ -10,13 +10,10 @@ import os
 import re
 import sys
 from collections import OrderedDict
-from enum import Enum
 from pathlib import Path
 from typing import Iterator
 
 VERSION = "1.1"
-
-Pattern = Enum("Pattern", ["Shell", "Regex"])
 
 
 def parse_args() -> argparse.Namespace:
@@ -37,9 +34,6 @@ def parse_args() -> argparse.Namespace:
         "-P", "--paths", default=os.getenv("PATH"), help="restrict search to paths"
     )
     argparser.add_argument(
-        "-s", "--shell", action="store_true", help="search shell pattern"
-    )
-    argparser.add_argument(
         "-x", "--regex", action="store_true", help="search regular expression"
     )
     argparser.add_argument("--version", action="version", version=f"%(prog)s {VERSION}")
@@ -47,11 +41,22 @@ def parse_args() -> argparse.Namespace:
     return argparser.parse_args()
 
 
+def get_regex(
+    string: str, ignore_case: bool = False, regex: bool = False
+) -> re.Pattern:
+    """
+    Compile string to regular expression
+    """
+    flags = re.IGNORECASE if ignore_case else 0
+    if regex:
+        return re.compile(string, flags)
+    if any(c in string for c in "[?*"):
+        return re.compile(fnmatch.translate(string), flags)
+    return re.compile(f"{string}$", flags)
+
+
 def xwhich(
-    command: str,
-    pattern: Pattern,
-    ignore_case: bool = False,
-    check_paths: str = os.getenv("PATH", default="."),
+    regex: re.Pattern, check_paths: str = os.getenv("PATH", default=".")
 ) -> Iterator[Path]:
     """
     Returns a generator with locations of command in PATH
@@ -60,28 +65,11 @@ def xwhich(
     paths = OrderedDict.fromkeys(
         Path(d).resolve() for d in check_paths.split(os.pathsep) if Path(d).is_dir()
     )
-    regex = None
-    if pattern is Pattern.Shell:
-        regex = fnmatch.translate(command)
-    elif pattern is Pattern.Regex:
-        regex = command
-    if regex:
-        flags = re.IGNORECASE if ignore_case else 0
 
     for path in paths:
-        if regex or ignore_case:
-            for file in path.iterdir():
-                if regex:
-                    if (
-                        re.match(regex, file.name, flags)
-                        and path.joinpath(file).is_file()
-                    ):
-                        yield path / file
-                else:  # ignore_case
-                    if file.name.lower() == command.lower():
-                        yield path / file
-        elif path.joinpath(command).is_file():
-            yield path / command
+        for file in path.iterdir():
+            if path.joinpath(file).is_file() and regex.match(file.name):
+                yield path / file
 
 
 def main():
@@ -89,19 +77,8 @@ def main():
     Main function
     """
     opts = parse_args()
-    if opts.regex and opts.shell:
-        sys.exit("ERROR: The -s & -x options are mutually exclusive")
-    pattern = None
-    if opts.regex:
-        pattern = Pattern.Regex
-    elif opts.shell:
-        pattern = Pattern.Shell
-    for path in xwhich(
-        opts.command,
-        pattern=pattern,
-        ignore_case=opts.insensitive,
-        check_paths=opts.paths,
-    ):
+    regex = get_regex(opts.command, ignore_case=opts.insensitive, regex=opts.regex)
+    for path in xwhich(regex, check_paths=opts.paths):
         print(os.fspath(path))
         if not opts.all:
             sys.exit(0)
